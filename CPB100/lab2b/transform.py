@@ -7,14 +7,29 @@
 
 # See https://github.com/GoogleCloudPlatform/datalab-samples/blob/master/basemap/earthquakes.ipynb for a notebook that illustrates this code
 
+from ast import parse
 import csv
 import requests
 import io
+import os
+import argparse
 import numpy as np
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
+
+
+#input param for bucket to transfer data from paser
+parser = argparse.ArgumentParser(description="bucket name to store file")
+#argument
+parser.add_argument('bucket',
+                      metavar='bucket',
+                      type=str,
+                      help='bucket name')
+#execute arg parse
+args = parser.parse_args()
+bucket= args.bucket
 
 # Classes to hold the data
 class EarthQuake:
@@ -82,7 +97,13 @@ def create_png(url, outfile):
   plt.title("Earthquakes {0} to {1}".format(start_day, end_day))
   plt.savefig(outfile)
 
+# 
+def copyFile(path):
+  path = "gs://"+ path
+  os.system("gsutil cp earthquakes.* " + path)
+
 if __name__ == '__main__':
   url = 'http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.csv'
   outfile = 'earthquakes.png'
   create_png(url, outfile)
+  copyFile(bucket)
